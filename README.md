@@ -1,5 +1,5 @@
-# ⚠️ Deprecated
-This repo is no longer maintained. Feel free to fork.
+# Forked from Wolfyxon/xfce-live-wallpaper
+This original repo is no longer maintained.
 
 # Live wallpaper for Linux XFCE
 A simple script that allows you to play a GIF, video or image sequence on your desktop wallpaper!
