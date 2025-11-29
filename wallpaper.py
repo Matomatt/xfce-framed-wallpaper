@@ -15,12 +15,10 @@ def setWallpaper(path, tmp_path, new_height):
     img = Image.open(path)
     ratio = img.size[0]/img.size[1]
     img = img.resize((round(new_height*ratio), new_height))
-    
     img.save(tmp_path)
     mean_colors = np.array(img).mean(axis=(0,1))/255
-    print(str(mean_colors[0]),'  ',str(mean_colors[1]),'  ',str(mean_colors[2]))
 
-    if os.path.exists(path):
+    if os.path.exists(tmp_path):
         cmds = [
             ['xfconf-query','-c','xfce4-desktop','-p','/backdrop/screen0/monitorDP-2/workspace0/last-image','-s',tmp_path],
             [
@@ -36,7 +34,13 @@ def setWallpaper(path, tmp_path, new_height):
 
 path = sys.argv[1]
 wait_time = float(sys.argv[2])
-subprocess.Popen(['pkill','-f','wallpaper.py'])
+running_processes = subprocess.run(
+    ["ps", "aux"], capture_output=True, text=True
+)
+wallpaper_script_running = len([line for line in running_processes.stdout.splitlines() if "wallaper.py" in line]) > 0
+if wallpaper_script_running:
+    print("Killing already running wallpaper script")
+    subprocess.Popen(['pkill','-f','wallpaper.py'])
 print("Listing frames in "+path)
 file_list = next(os.walk(path), (None, None, []))[2]
 random.shuffle(file_list)
@@ -46,9 +50,10 @@ output = subprocess.check_output("xrandr | grep '*' | awk '{print $1}'", shell=T
 resolution = output.decode().strip().split('x')
 print(f"Screen size: {resolution}")
 print("Animating")
-for file in file_list:
-    file_path = path+file
-    tmp_path = "/tmp/"+file_path.split('.')[0].split('/')[-1]+"_tmp"+"."+file_path.split('.')[1]
-    setWallpaper(file_path, tmp_path, round(int(resolution[1])*0.8))
-    time.sleep(wait_time)
-    os.remove(tmp_path)
+while True:
+    for file in file_list:
+        file_path = path+file
+        tmp_path = "/tmp/"+file_path.split('.')[0].split('/')[-1]+"_tmp"+"."+file_path.split('.')[1]
+        setWallpaper(file_path, tmp_path, round(int(resolution[1])*0.8))
+        time.sleep(wait_time)
+        os.remove(tmp_path)
