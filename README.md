@@ -13,7 +13,7 @@ __Make sure you have these programs installed:__
 __IMPORTANT NOTE:__ Paths must be global, example: `/home/username/Pictures/file` not `./file` <br>
 
 ```bash
-python main.py -cache
+nohup python3 /fullpath/wallpaper.py /fullpath/Pictures/Wallpapers/ 600 &
 ```
 
 ### How does it work?
