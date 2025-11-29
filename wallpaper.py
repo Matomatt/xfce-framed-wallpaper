@@ -10,17 +10,20 @@ import numpy as np
 
 
 def setWallpaper(path, tmp_path, new_height):
-    print("Setting wallpaper to "+path)
-
+    tmp_path_jpg = tmp_path.split(".")[0]+".jpg"
+    
+    print("Setting wallpaper to "+path, "(",tmp_path_jpg,")")
+    
     img = Image.open(path)
     ratio = img.size[0]/img.size[1]
-    img = img.resize((round(new_height*ratio), new_height))
-    img.save(tmp_path)
+    img = img.resize((round(new_height*ratio), new_height), Image.LANCZOS)
+    
+    img.save(tmp_path_jpg, 'JPEG', quality=100)
     mean_colors = np.array(img).mean(axis=(0,1))/255
 
-    if os.path.exists(tmp_path):
+    if os.path.exists(tmp_path_jpg):
         cmds = [
-            ['xfconf-query','-c','xfce4-desktop','-p','/backdrop/screen0/monitorDP-2/workspace0/last-image','-s',tmp_path],
+            ['xfconf-query','-c','xfce4-desktop','-p','/backdrop/screen0/monitorDP-2/workspace0/last-image','-s',tmp_path_jpg],
             [
                 'xfconf-query','-c','xfce4-desktop','-p','/backdrop/screen0/monitorDP-2/workspace0/rgba1',
                 '-t','double','-s',f"{mean_colors[0]:.4f}",'-t','double','-s',f"{mean_colors[1]:.4f}",
@@ -56,4 +59,5 @@ while True:
         tmp_path = "/tmp/"+file_path.split('.')[0].split('/')[-1]+"_tmp"+"."+file_path.split('.')[1]
         setWallpaper(file_path, tmp_path, round(int(resolution[1])*0.8))
         time.sleep(wait_time)
-        os.remove(tmp_path)
+        tmp_path_jpg = tmp_path.split(".")[0]+".jpg"
+        os.remove(tmp_path_jpg)
